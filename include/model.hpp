@@ -8,7 +8,9 @@
 
 namespace tuipp {
     inline namespace v0_0_1 {
+        class Program;
         struct Model {
+            Program* prog;
             virtual ~Model() {}
 
             virtual std::string View() = 0;

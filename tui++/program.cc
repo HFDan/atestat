@@ -11,7 +11,16 @@ fflush(stdout)\
 
 namespace tuipp {
     inline namespace v0_0_1 {
-        Program::~Program() { delete mod; }    
+        Program::~Program() { 
+            delete mod;
+
+            // We no longer need the mutex, since all threads *should* be done by the time the constructor is called
+            while (!messageQueue.empty()) {
+                auto* msg = messageQueue.front();
+                delete msg;
+                messageQueue.pop();
+            }
+        } 
 
         std::pair<Model&, Program::err> Program::Start() {
             // Render the initial frame
@@ -20,24 +29,30 @@ namespace tuipp {
 
             bool has_updated = false;
             while (!should_tuipp_quit) {
-                KeyMsg* potentialKeyMessage = nullptr;
                 if (kbhit()) {
-                    if (!potentialKeyMessage) potentialKeyMessage = new KeyMsg;
-                    potentialKeyMessage->Key=readKeyFromStdin();
+                    this->Send<tuipp::KeyMsg>(readKeyFromStdin());
                 }
 
-                if (potentialKeyMessage || has_updated) {                        
+                while (!messageQueue.empty() || has_updated) {                        
+                    tuipp::Msg* msg = nullptr;
+                    if (!messageQueue.empty()){
+                        std::lock_guard<std::mutex> lock(msgQueueMtx);
+                        msg = messageQueue.front();
+                        messageQueue.pop();
+                    }
+
                     // Update
-                    auto result = mod->Update(potentialKeyMessage);
+                    auto result = mod->Update(msg);
+                    delete msg;
 
                     has_updated = result.first;
                     auto cmd = result.second;
-                    delete potentialKeyMessage;
 
                     // Render
                     set_cursor_position(origin);
                     DRAW_FRAME(mod);
 
+                    // Run command
                     if (cmd != nullptr) cmd();
                 }
             }
@@ -48,6 +63,7 @@ namespace tuipp {
             ::printf("\033[0G"); // Move to start of line
             origin = get_curosr_position();
             
+            mod->prog = this;
             mod->Init();
         }
     }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <mutex>
+#include <queue>
+
 #include <model.hpp>
 #include <tuipp_base.hpp>
 
@@ -9,6 +12,9 @@ namespace tuipp {
             private:
                 Model* mod{nullptr};
                 std::pair<uint32_t, uint32_t> origin{0, 0};
+
+                std::queue<tuipp::Msg*> messageQueue;
+                std::mutex msgQueueMtx;
 
             public:
                 using err = uint64_t;
@@ -24,7 +30,12 @@ namespace tuipp {
 
                 std::pair<Model&, err> Start();
 
-                void Send(/*msg*/) {};
+                template<class MsgClass, typename... ConstructArgs>
+                void Send(ConstructArgs... args) {
+                    std::lock_guard<std::mutex> lock(msgQueueMtx);
+                    messageQueue.push(new MsgClass(args...));
+                };
+
                 void SetWindowTitle(std::string_view title) {};
                 void Wait() {};
                 
@@ -38,7 +49,7 @@ namespace tuipp {
         template <typename ModelType>
         Program NewProgram() {
             init_base();
-            auto* temp = new ModelType; 
+            auto* temp = new ModelType;
             return Program(temp);
         };
     }

@@ -10,6 +10,7 @@ namespace tuipp {
 
         struct KeyMsg: public Msg {
             Key Key;
+            KeyMsg(struct Key Key): Key(Key) {}
         };
     }
 }

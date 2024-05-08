@@ -1,5 +1,8 @@
 #include <tuipp.hpp>
 
+class TestMsg: public tuipp::Msg {
+};
+
 class Todo: public tuipp::Model {
     std::vector<std::pair<std::string, bool>> items;
     bool currently_adding = false;
@@ -9,6 +12,10 @@ class Todo: public tuipp::Model {
 
     virtual void Init() override { }
     virtual std::pair<bool, tuipp::Cmd> Update(const tuipp::Msg* msg) override {
+        if (const auto* Test = dynamic_cast<const TestMsg*>(msg)) {
+            items.emplace_back("! This is a test for the message queue !", true);
+            return {true, nullptr};
+        }
         if (const auto* KeyMsg = dynamic_cast<const tuipp::KeyMsg*>(msg)) {
             if (KeyMsg->Key.String() == "ctrl+c") { return {false, &tuipp::Quit};}
 
@@ -29,6 +36,12 @@ class Todo: public tuipp::Model {
                     return {true, nullptr};
                 }
             } else {
+                if (KeyMsg->Key.String() == "t") {
+                    return {true, [this]() -> void {
+                        prog->Send<TestMsg>();
+                    }};
+                    return {false, nullptr};
+                }
                 if (KeyMsg->Key.String() == "a") {
                     currently_adding = true;
                     tuipp::show_cursor();
@@ -71,6 +84,7 @@ class Todo: public tuipp::Model {
         ret += tuipp::Color::fromHex("#a89984").toANSI() + "(Controls: [" +
             tuipp::Color::fromHex("#d3869b").toANSI() + "Enter" + tuipp::Color::fromHex("#a89984").toANSI() + "] - toggle complete; [" +
             tuipp::Color::fromHex("#d3869b").toANSI() + "d" + tuipp::Color::fromHex("#a89984").toANSI() + "] - delete; [" +
+            tuipp::Color::fromHex("#d3869b").toANSI() + "t" + tuipp::Color::fromHex("#a89984").toANSI() + "] - send a test message to the application; [" +
             tuipp::Color::fromHex("#d3869b").toANSI() + "a" + tuipp::Color::fromHex("#a89984").toANSI() + "] - add)\n\r\n\r"
             + tuipp::Color::ANSIdefault();
         uint64_t i = 0; 
