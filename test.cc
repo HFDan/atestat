@@ -87,7 +87,7 @@ class Todo: public tuipp::Model {
             tuipp::Color::fromHex("#d3869b").toANSI() + "t" + tuipp::Color::fromHex("#a89984").toANSI() + "] - send a test message to the application; [" +
             tuipp::Color::fromHex("#d3869b").toANSI() + "a" + tuipp::Color::fromHex("#a89984").toANSI() + "] - add)\n\r\n\r"
             + tuipp::Color::ANSIdefault();
-        uint64_t i = 0; 
+        uint64_t i = 0;
         for (const auto&[item, completed] : items) {
             ret += std::format("{} [{}] {}\n\r", (i == cursor) ? cursor_glyph : " ", completed ? "*" : " ", item);
             i++;

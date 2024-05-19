@@ -10,12 +10,12 @@ namespace tuipp {
         extern bool should_tuipp_quit;
 
         /**
-         * @brief Instructs bubbletuipp to quit
+         * @brief Instructs tuipp to quit
          */
         void Quit();
 
         void init_base();
-        
+
         /**
          * @brief Reads a key from stdin
          *

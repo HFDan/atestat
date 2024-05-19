@@ -8,7 +8,7 @@ namespace tuipp {
         typedef std::function<void(void)> Cmd;
 
         /**
-         * @brief Runs multiple commands simultaneously, makes no guarantees about order
+         * @brief Runs multiple commands one after the other, guaranteed to be in order
          *
          * @param cmds The commands to run
          */
@@ -22,7 +22,7 @@ namespace tuipp {
         }
 
         /**
-         * @brief Runs multiple commands one after the other, guaranteed to be in order
+         * @brief Runs multiple commands simultaneously, makes no guarantees about order
          *
          * @param cmds The commands to run
          */

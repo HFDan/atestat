@@ -13,6 +13,5 @@ libraria are ca tinta robusticitatea, dar si simplicitatea.
 - [x] Suport complet UTF-8
 - [x] Lucreaza foarte usor cu terminale TrueColor
 - [x] Performanta - Renderer-ul este single-threaded si evita orice procesare non-necesara a outputului. In plus, este atat de rapid incat nici macar nu are nevoie sa calculeze damage.
-- [x] Versatilitate - Sistemul de mesaje si comenzi este unul foarte extensibil. Un message queue este foarte usor de implementat, dar este totusi in afara scopului proiectului.
+- [x] Versatilitate - Sistemul de mesaje si comenzi este unul foarte extensibil.
 - [x] Simplicitate - Arhitectura MVU duce la cod "clean" si usor de citit
-
