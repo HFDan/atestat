@@ -3,11 +3,12 @@
 #include <mutex>
 #include <queue>
 
-#include <model.hpp>
+#include <msg.hpp>
 #include <tuipp_base.hpp>
 
 namespace tuipp {
     inline namespace v0_0_1 {
+        class Model;
         class Program {
             private:
                 Model* mod{nullptr};
@@ -38,7 +39,7 @@ namespace tuipp {
 
                 void SetWindowTitle(std::string_view title) {};
                 void Wait() {};
-                
+
             private:
                 template <typename ModelType>
                 friend Program NewProgram();

@@ -14,6 +14,7 @@ class Todo: public tuipp::Model {
     virtual std::pair<bool, tuipp::Cmd> Update(const tuipp::Msg* msg) override {
         if (const auto* Test = dynamic_cast<const TestMsg*>(msg)) {
             items.emplace_back("! This is a test for the message queue !", true);
+            cursor = items.size()-1;
             return {true, nullptr};
         }
         if (const auto* KeyMsg = dynamic_cast<const tuipp::KeyMsg*>(msg)) {
@@ -33,13 +34,12 @@ class Todo: public tuipp::Model {
                     addition.clear();
                     currently_adding = false;
                     tuipp::hide_cursor();
+                    cursor = items.size()-1;
                     return {true, nullptr};
                 }
             } else {
                 if (KeyMsg->Key.String() == "t") {
-                    return {true, [this]() -> void {
-                        prog->Send<TestMsg>();
-                    }};
+                    return {true, [this]() -> void {Send<TestMsg>();}};
                     return {false, nullptr};
                 }
                 if (KeyMsg->Key.String() == "a") {

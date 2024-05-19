@@ -36,7 +36,7 @@ namespace tuipp {
                 ~Ticker() {
                     if (!stopped) stop();
                 }
-                
+
                 void start() {
                     thr = std::thread(&Ticker::loop, this);
                 }
@@ -47,7 +47,7 @@ namespace tuipp {
                 }
 
                 auto C() {
-                    // while (!has_ticked) {}
+                    while (!has_ticked) {}
 
                     auto ret = last_tick;
                     has_ticked = false;
