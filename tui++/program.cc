@@ -2,14 +2,18 @@
 #include <program.hpp>
 #include <model.hpp>
 #include <terminal.hpp>
+#include <thread>
 #include <ticker.hpp>
 #include <tuipp_base.hpp>
+#include <msg.hpp>
 
 #define DRAW_FRAME(mod) \
 ::printf("\033[0J");\
 fflush(stdout);\
 ::printf("%s", mod->View().c_str());\
 fflush(stdout)\
+
+bool tuipp::Program::isAlreadyInExistance = false;
 
 namespace tuipp {
     inline namespace v0_0_1 {
@@ -26,19 +30,28 @@ namespace tuipp {
                 delete msg;
                 messageQueue.pop();
             }
+
+            isAlreadyInExistance = false;
         }
 
         std::pair<Model&, Program::err> Program::Start() {
+            mod->Init();
+
             // Render the initial frame
             set_cursor_position(origin);
             DRAW_FRAME(mod);
 
+            // Start the input thread
+            std::jthread input_thread([this]() -> void {
+                while (!should_tuipp_quit) {
+                    if (kbhit()) {
+                        this->Send<tuipp::KeyMsg>(readKeyFromStdin());
+                    }
+                }
+            });
+
             bool has_updated = false;
             while (!should_tuipp_quit) {
-                if (kbhit()) {
-                    this->Send<tuipp::KeyMsg>(readKeyFromStdin());
-                }
-
                 while (!messageQueue.empty() || has_updated) {
                     tuipp::Msg* msg = nullptr;
                     if (!messageQueue.empty()){
@@ -46,6 +59,9 @@ namespace tuipp {
                         msg = messageQueue.front();
                         messageQueue.pop();
                     }
+
+                    // Messages that the program should handle
+                    if (dynamic_cast<const tuipp::QuitMsg*>(msg)) tuipp::Quit();
 
                     // Update
                     auto result = mod->Update(msg);
@@ -59,7 +75,12 @@ namespace tuipp {
                     DRAW_FRAME(mod);
 
                     // Run command
-                    if (cmd != nullptr) cmd();
+                    // if (cmd != nullptr) cmd();
+                    // Commands now run in their own independent thread, so they don't hang the renderer
+                    if (cmd != nullptr) {
+                        std::thread cmd_thr(tuipp::Cmd{cmd});
+                        cmd_thr.detach();
+                    }
                 }
             }
             return {*mod, 0};
@@ -71,6 +92,7 @@ namespace tuipp {
 
             mod->__Prog = this;
             mod->Init();
+            isAlreadyInExistance = true;
         }
     }
 }

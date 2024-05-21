@@ -45,13 +45,17 @@ namespace tuipp {
                 friend Program NewProgram();
 
                 Program(Model* mod);
+
+                static bool isAlreadyInExistance;
         };
 
         template <typename ModelType>
         Program NewProgram() {
-            init_base();
-            auto* temp = new ModelType;
-            return Program(temp);
+            if (!Program::isAlreadyInExistance) {
+                init_base();
+                auto* temp = new ModelType;
+                return Program(temp);
+            } else throw std::runtime_error("A program is already running. Tuipp does not support running multiple models at the same time.");
         };
     }
 }

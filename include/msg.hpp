@@ -8,9 +8,11 @@ namespace tuipp {
             virtual ~Msg() = default;
         };
 
-        struct KeyMsg: public Msg {
+        struct KeyMsg final: public Msg {
             Key Key;
             KeyMsg(struct Key Key): Key(Key) {}
         };
+
+        struct QuitMsg final: public Msg {};
     }
 }

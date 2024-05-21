@@ -1,7 +1,7 @@
+#include "msg.hpp"
 #include <tuipp.hpp>
 
-class TestMsg: public tuipp::Msg {
-};
+class TestMsg: public tuipp::Msg {};
 
 class Todo: public tuipp::Model {
     std::vector<std::pair<std::string, bool>> items;
@@ -18,7 +18,11 @@ class Todo: public tuipp::Model {
             return {true, nullptr};
         }
         if (const auto* KeyMsg = dynamic_cast<const tuipp::KeyMsg*>(msg)) {
-            if (KeyMsg->Key.String() == "ctrl+c") { return {false, &tuipp::Quit};}
+            if (KeyMsg->Key.String() == "ctrl+c") {
+                return {false, [this]() -> void {
+                    Send<tuipp::QuitMsg>();
+                }};
+            }
 
             if (currently_adding) {
                 if (KeyMsg->Key.Type == tuipp::KeyType::Rune) {
